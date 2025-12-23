@@ -5,39 +5,40 @@ import { Apiresponse } from "../utils/apiResponse.js";
 
 export const Login = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
-  console.log("body:");
+  console.log(username, email);
 
-  if ([username, password, email].some((e) => e.trim() == "")) {
-    throw new Apierror(
-      401,
-      "please check login details username or password Empty"
-    );
+  if (!password || (!username && !email)) {
+    throw new Apierror(406, "please check password username/email ");
   }
+
   const user = await User.findOne({
     $or: [{ username }, { email }],
-  }).select([
-    "-mobile_number",
-    "-createdAt",
-    "-updatedAt",
-    "-fullname",
-    "-_id",
-  ]);
+  });
 
-  console.log("DATA:",user);
-
+  //comparing user given password with hashing password in database
   const decodedpassword = async (password) => {
     const correct_password = await user.isPasswordCorrect(password);
+
+    decodedpassword(password);
     if (!correct_password) {
       throw new Apierror(404, "password invalid please check password");
     }
-    if (correct_password) user.password = password;
-    return correct_password;
   };
-  // decodedpassword(password);
 
+  //checking user password correct or not
   if (!user) {
     throw new Apierror(409, "please SignUp you are new user");
   }
 
-  return res.status(200).json(new Apiresponse(200, user, "login successfully"));
+  const data = await user
+    .findOne(user._id)
+    .select([
+      "-mobile_number",
+      "-createdAt",
+      "-updatedAt",
+      "-fullname",
+      "-_id",
+    ]);
+
+  return res.status(200).json(new Apiresponse(200, data, "login successfully"));
 });

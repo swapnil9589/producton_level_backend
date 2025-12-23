@@ -2,6 +2,7 @@ import { Router } from "express";
 import { registerUser } from "../controllers/userregister.js";
 import { Login } from "../controllers/userLogin.js";
 import { upload } from "../middleware/multer.js";
+import { Profile } from "../controllers/Profile.js";
 
 const userrouters = Router();
 userrouters.post(
@@ -18,6 +19,6 @@ userrouters.post(
   ]),
   registerUser
 );
-userrouters.route("./Profile").get(Profile);
+userrouters.route("/Profile/:id").get(Profile);
 userrouters.route("/Login").post(Login);
 export { userrouters };

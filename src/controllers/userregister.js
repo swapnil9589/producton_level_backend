@@ -1,3 +1,4 @@
+console.clear();
 import { Apierror } from "../utils/apierror.js";
 import { Apiresponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -68,7 +69,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   //uploading coverimage on cloudinary
   const coverimage = await cloudinary(cover_image_path);
 
-  //storing registered user in database
+  //storing pmregistered user in database
   const createduser = await User.create({
     username,
     fullname: fullname || "",
