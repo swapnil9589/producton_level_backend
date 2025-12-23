@@ -4,21 +4,13 @@ import { Apiresponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../DBmodels/user.Model.js";
 import { cloudinary } from "../utils/cloudinary.js";
-
+import cookie from "cookie-parser";
 import {
   isValid_mobile_number,
   isValid_username,
 } from "../utils/digitchecker.js";
 export const registerUser = asyncHandler(async (req, res) => {
-  const {
-    username,
-    mobile_number,
-    Profile_Image,
-    coverImage,
-    fullname,
-    password,
-    email,
-  } = req.body;
+  const { username, mobile_number, fullname, password, email } = req.body;
 
   // checking req body input is empty or not
   if (
@@ -59,27 +51,59 @@ export const registerUser = asyncHandler(async (req, res) => {
   if (existing_user) {
     throw new Apierror(400, "user already exist please Login");
   }
-  //profile image
-  const Profile_Image_path = req?.files?.Profile_Image[0]?.path;
-  //coverimage
-  const cover_image_path = req?.files?.Profile_Image[0]?.path;
-
-  //uploading profile on cloudinary
-  const profileimage = await cloudinary(Profile_Image_path);
-  //uploading coverimage on cloudinary
-  const coverimage = await cloudinary(cover_image_path);
 
   //storing pmregistered user in database
-  const createduser = await User.create({
+  const created_user = await User.create({
     username,
     fullname: fullname || "",
     email,
     mobile_number,
     password,
-    profile_photo: profileimage,
-    cover_photo: coverimage,
   });
+  // console.log(refreshtoken);
 
-  const data = [createduser];
-  res.status(201).json(new Apiresponse(201, data, "user created successfully"));
+  const data = [created_user];
+  res
+    .status(200)
+    .cookie()
+    .send(new Apiresponse(201, data, "user created successfully"));
+
+  //storing profile if exist
+  let profileimage;
+  let image_url;
+  if (
+    Array.isArray(await req?.files?.Profile_Image) &&
+    req.files.Profile_Image[0].path &&
+    req.files
+  ) {
+    profileimage = await req.files.Profile_Image[0].path;
+    image_url = await cloudinary(profileimage);
+  }
+
+  //storing coverimage if exist
+  let coverimage;
+  let coverimage_url;
+  if (
+    Array.isArray(await req?.files?.coverImage) &&
+    req.files.coverImage[0].path &&
+    req.files
+  ) {
+    coverimage = await req.files.coverImage[0].path;
+    coverimage_url = await cloudinary(coverimage);
+  }
+
+  const refreshtoken = await created_user.generateRefreshToken();
+
+  const user = await User.findByIdAndUpdate(
+    created_user._id,
+    {
+      $set: {
+        profile_photo: image_url,
+        cover_photo: coverimage_url,
+        refresh_token: refreshtoken,
+      },
+    },
+    { new: true }
+  );
+  console.log("\n", "Data uploaded successfully on database%%%-----", user);
 });

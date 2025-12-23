@@ -31,7 +31,6 @@ const userSchema = new Schema(
     },
     profile_photo: {
       type: String,
-      required: true,
       unique: true,
     },
     cover_photo: {
@@ -41,6 +40,10 @@ const userSchema = new Schema(
     isActive: {
       type: Boolean,
     },
+    refresh_token:{
+      type:String,
+      unique:true
+    }
   },
   { timestamps: true }
 );
@@ -66,7 +69,7 @@ userSchema.methods.generateAccessToken = function () {
       username: this.username,
       fullName: this.fullName,
     },
-    process.env.ACCESS_TOKEN_SECRET,
+    process.env.ACCESS_TOKEN_SECRET_KEY,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRED }
   );
 };

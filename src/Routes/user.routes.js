@@ -2,7 +2,7 @@ import { Router } from "express";
 import { registerUser } from "../controllers/userregister.js";
 import { Login } from "../controllers/userLogin.js";
 import { upload } from "../middleware/multer.js";
-import { Profile } from "../controllers/Profile.js";
+import { sample } from "../controllers/Profile.js";
 
 const userrouters = Router();
 userrouters.post(
@@ -19,6 +19,18 @@ userrouters.post(
   ]),
   registerUser
 );
-userrouters.route("/Profile/:id").get(Profile);
+userrouters.route("/Profile").post(
+  upload.fields([
+    {
+      name: "Profile_Image",
+      maxCount: 1,
+    },
+    {
+      name: "coverImage",
+      maxCount: 1,
+    },
+  ]),
+  sample
+);
 userrouters.route("/Login").post(Login);
 export { userrouters };

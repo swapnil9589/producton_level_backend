@@ -7,6 +7,7 @@ import cookie from "cookie-parser";
 const app = express();
 
 app.use(express.json({ limit: "64kb" }));
+app.use(cookie());
 app.use(express.urlencoded({ limit: "64kb" }));
 app.use(cookie());
 app.use(
@@ -18,4 +19,3 @@ app.use(
 app.use("/users", logfiles, userrouters);
 
 export { app };
-
