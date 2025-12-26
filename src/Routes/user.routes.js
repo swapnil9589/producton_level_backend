@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { registerUser } from "../controllers/userregister.js";
-import { Login } from "../controllers/userLogin.js";
 import { upload } from "../middleware/multer.js";
-import { sample } from "../controllers/Profile.js";
+import {
+  registerUser,
+  passwordChange,
+  Login,
+  changeemail,
+  profile,
+} from "../controllers/userController.js";
 
 const userrouters = Router();
 userrouters.post(
@@ -19,18 +23,20 @@ userrouters.post(
   ]),
   registerUser
 );
-userrouters.route("/Profile").post(
+userrouters.route("/Profile").patch(
   upload.fields([
     {
-      name: "Profile_Image",
+      name: "profile_photo",
       maxCount: 1,
     },
     {
-      name: "coverImage",
+      name: "cover_photo",
       maxCount: 1,
     },
   ]),
-  sample
+  profile
 );
 userrouters.route("/Login").post(Login);
+userrouters.route("/ForgetPassword").patch(passwordChange);
+userrouters.route("/forgetemail").patch(changeemail);
 export { userrouters };

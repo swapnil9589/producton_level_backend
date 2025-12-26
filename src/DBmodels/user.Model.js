@@ -23,6 +23,7 @@ const userSchema = new Schema(
       type: String,
       lowercase: true,
       unique: true,
+      required: true,
     },
     mobile_number: {
       type: String,
@@ -40,18 +41,17 @@ const userSchema = new Schema(
     isActive: {
       type: Boolean,
     },
-    refresh_token:{
-      type:String,
-      unique:true
-    }
+    refresh_token: {
+      type: String,
+      unique: true,
+    },
   },
   { timestamps: true }
 );
 
 /* Hash password before save */
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
+  if (!this.isModified("password")) return next;
   this.password = await bcrypt.hash(this.password, 10);
   next;
 });
