@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { upload } from "../middleware/multer.js";
+import { Authmiddleware } from "../middleware/authorizationmiddleware.js";
 import {
   registerUser,
   passwordChange,
   Login,
   changeemail,
   profile,
+  logout,
 } from "../controllers/userController.js";
 
 const userrouters = Router();
@@ -26,17 +28,18 @@ userrouters.post(
 userrouters.route("/Profile").patch(
   upload.fields([
     {
-      name: "profile_photo",
+      name: "profile",
       maxCount: 1,
     },
     {
-      name: "cover_photo",
+      name: "cover",
       maxCount: 1,
     },
   ]),
   profile
 );
 userrouters.route("/Login").post(Login);
+userrouters.route("/logout", Authmiddleware).get(logout);
 userrouters.route("/ForgetPassword").patch(passwordChange);
 userrouters.route("/forgetemail").patch(changeemail);
 export { userrouters };

@@ -23,7 +23,6 @@ export const Authmiddleware = asyncHandler(async (req, res, next) => {
     if (!user) {
       throw new Apierror(401, "invalid accessToken");
     }
-    console.log(user);
 
     req.user = user;
     next();

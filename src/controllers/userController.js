@@ -139,6 +139,25 @@ export const Login = asyncHandler(async (req, res) => {
     .json(new Apiresponse(200, AccessToken, "login successfully"));
 });
 // -----------------------------------------------------------------------------------------------------------------
+
+export const logout = asyncHandler(async (req, res) => {
+  const userId = req.user;
+
+  await User.findById(userId); // optional, not required for logout
+
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true, // include if cookie was Secure
+    sameSite: "strict", // must match original
+    path: "/", // must match original
+  });
+
+  res.status(200).json({
+    message: "Logged out successfully",
+  });
+});
+
+//----------------------------------------------------------------------------------------------------------------------
 export const passwordChange = asyncHandler(async (req, res) => {
   const { email, username, password, confirm_password } = req.body;
 
@@ -172,14 +191,12 @@ export const sample = (req, res) => {
 
   res.end("wait");
 };
-
 //--------------------------------------------------------------------------------------------------------
 //password change controller
 export const changeemail = asyncHandler(async (req, res) => {
-  const { username } = req.body;
-  let { mobile_number } = req.body;
-  mobile_number.toString();
-  if (!(mobile_number || username)) {
+  const { username, email } = req.body;
+
+  if (!(email || username)) {
     throw new Apierror(
       404,
       "please provide username or email for email change"
@@ -196,20 +213,24 @@ export const changeemail = asyncHandler(async (req, res) => {
 });
 //-----------------------------------------------------------------------------------------------
 export const profile = asyncHandler(async (req, res) => {
-  let profile;
+  if (!(req.files.profile[0].path || req.files.cover[0].path)) {
+    throw new Apierror(404, "please upload profile photo or cover photo");
+  }
+  //fetchinfg profile photo from multer body
+  let profile = req.files?.profile[0]?.path;
+  let coverimage = req.files?.cover?.[0].path;
+  console.log(profile);
+  console.log(coverimage);
   res.send(new Apiresponse(200, "uplaoded successfully"));
-  if (req.files?.profile_photo[0]?.path) {
-    profile = req.files?.profile_photo?.[0].path;
-  }
-  let coverimage;
-  if (req.files?.profile_photo[0]?.path) {
-    coverimage = req.files?.cover_photo?.[0].path;
-  }
-  const cloudinaryprofile = await cloudinary(profile);
-  const cloudinary_coverphoto = await cloudinary(coverimage);
+
+  //upload photos on cloudinary
+  const profilefileurl = await cloudinary(profile);
+  const coverphotourl = await cloudinary(coverimage);
+  console.log(profilefileurl);
+  console.log(coverphotourl);
+
   const user = await User.findByIdAndUpdate(req.user, {
-    $set: [{ profile_photo }, { cover_photo }],
+    $set: { profile_photo: profilefileurl, cover_photo: coverphotourl },
     new: true,
   });
-  console.log(user);
 });

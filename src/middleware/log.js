@@ -8,9 +8,8 @@ export const logfiles = (req, res, next) => {
     new Date().toString().substring(0, 33) +
     " " +
     req.headers["user-agent"] +
-    ". Origin-" +
+    "   Origin-" +
     req.headers.host +
-    "/" +
     req.originalUrl +
     "\n";
   fs.appendFile("./src/text.txt", dateandtime.toString(), "utf-8", () => {
